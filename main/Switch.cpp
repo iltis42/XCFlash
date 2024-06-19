@@ -20,7 +20,6 @@
 #include <logdef.h>
 #include "Setup.h"
 #include "average.h"
-#include "vector.h"
 #include "Units.h"
 #include "xcflash.h"
 

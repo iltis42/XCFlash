@@ -22,9 +22,7 @@
 #include "OTA.h"
 #include "Version.h"
 #include "Colors.h"
-#include "flarmnetdata.h"
 #include "Switch.h"
-#include "SetupMenu.h"
 
 OTA *ota = 0;
 AdaptUGC *egl = 0;
@@ -32,7 +30,6 @@ AdaptUGC *egl = 0;
 // global color variables for adaptable display variant
 
 
-static SetupMenu *menu=0;
 bool inch2dot4=false;
 Switch swUp;
 Switch swDown;

@@ -27,7 +27,6 @@
 #include "logdef.h"
 #include "SetupCommon.h"
 #include "ESP32NVS.h"
-#include "SetupMenuValCommon.h"
 
 
 /*
@@ -57,6 +56,8 @@ typedef enum e_vario_unit { VARIO_UNIT_MS, VARIO_UNIT_FPM, VARIO_UNIT_KNOTS } e_
 typedef enum e_data_monitor { MON_OFF, MON_BLUETOOTH, MON_WIFI_8880, MON_WIFI_8881, MON_WIFI_8882, MON_S1, MON_S2, MON_CAN  }  e_data_monitor_t;
 typedef enum e_non_move { NON_MOVE_HIDE, NON_MOVE_DISPLAY } e_non_move_t;
 typedef enum e_buzz_notify { BUZZ_OFF, BUZZ_1KM, BUZZ_2KM } e_buzz_notify_t;
+typedef enum e_restart_mode { RST_NONE, RST_ON_EXIT, RST_IMMEDIATE } e_restart_mode_t;
+
 
 void change_bal();
 

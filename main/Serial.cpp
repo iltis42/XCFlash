@@ -241,7 +241,7 @@ void Serial::huntBaudrate(){
 			trials = 0;
 			baudrate++;
 			if( baudrate > 6 ){
-				baudrate=1;  // 4800
+				baudrate=2;  // 9600
 			}
 			uart_set_baudrate(uart_num, baud[baudrate]);
 			ESP_LOGI(FNAME,"Serial Interface ttyS1 next baudrate: %d", baud[baudrate] );
@@ -300,10 +300,9 @@ void Serial::begin(){
 		else{
 			if( serial1_tx_enable.get() ){
 				ESP_LOGI(FNAME,"Serial pins normal, TX enabled" );
-				// Set UART pins(TX, RX, RTS, CTS ) RX, RTS and CTS not wired, dummy
+				// Set UART pins(TX, RX, RTS, CTS ) RTS and CTS nor wired, dummy
 				ESP_ERROR_CHECK(uart_set_pin(uart_num, GPIO_NUM_37, GPIO_NUM_38, GPIO_NUM_33, GPIO_NUM_34));
 			}else{
-
 				ESP_LOGI(FNAME,"Serial pins normal, TX disable" );
 				ESP_ERROR_CHECK(uart_set_pin(uart_num, GPIO_NUM_36, GPIO_NUM_38, GPIO_NUM_33, GPIO_NUM_34));
 				gpio_set_direction(GPIO_NUM_37, GPIO_MODE_INPUT);     // high impedance

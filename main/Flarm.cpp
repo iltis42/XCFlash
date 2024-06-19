@@ -3,7 +3,6 @@
 #include "Colors.h"
 #include "math.h"
 #include "pflaa2.h"
-#include "TargetManager.h"
 #include <iostream>
 #include <sstream>
 
@@ -173,7 +172,6 @@ void Flarm::parsePFLAA( const char *pflaa ){
 
 	_tick=0;
 	timeout = FLARM_TIMEOUT;
-	TargetManager::receiveTarget( PFLAA );
 }
 
 #define CENTERX 120

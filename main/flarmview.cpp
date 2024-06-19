@@ -19,36 +19,25 @@
 #include <Serial.h>
 #include "Flarm.h"
 #include "driver/ledc.h"
-#include "Buzzer.h"
 #include "OTA.h"
 #include "Version.h"
 #include "Colors.h"
 #include "flarmnetdata.h"
-#include "TargetManager.h"
 #include "Switch.h"
 #include "SetupMenu.h"
 
-AdaptUGC *egl = 0;
 OTA *ota = 0;
-bool inch2dot4=false;
+AdaptUGC *egl = 0;
 
+// global color variables for adaptable display variant
 
-class SwitchObs: public SwitchObserver
-{
-public:
-	SwitchObs(const char* name) : SwitchObserver() {
-		ESP_LOGI(FNAME,"attach me %s", name );
-		Switch::attach(this);
-	};
-	~SwitchObs() {};
-	void doubleClick() {};
-	void press() {};
-	void longPress() {  ESP_LOGI(FNAME,"LONGPRESS");
-
-					 };
-};
 
 static SetupMenu *menu=0;
+bool inch2dot4=false;
+Switch swUp;
+Switch swDown;
+Switch swMode;
+float zoom=1.0;
 
 extern "C" void app_main(void)
 {
@@ -83,38 +72,24 @@ extern "C" void app_main(void)
     delay(100);
     //  serial1_speed.set( 1 );  // test for autoBaud
 
-    egl = new AdaptUGC();
-    egl->begin();
-    // egl->setRedBlueTwist( true );
-    egl->clearScreen();
-    Buzzer::init(2700);
-    Buzzer::play2( BUZZ_C, 500,audio_volume.get(), BUZZ_C, 1000, 0, 1 );
-
     Version V;
     std::string ver( "SW Ver.: " );
     ver += V.version();
 
-    egl->setFont(ucg_font_fub20_hn);
-    egl->setColor(COLOR_WHITE);
-    egl->setPrintPos( 50, 35 );
-    egl->print("XCFlarmView 2.0");
+    if( DISPLAY_W == 240 )
+    	inch2dot4 = true;
+
+
     if( serial1_tx_enable.get() ){ // we don't need TX pin, so disable
-    	serial1_tx_enable.set(0);
+      	serial1_tx_enable.set(0);
     }
 
-    egl->setPrintPos( 10, 80 );
-    egl->printf("%s",ver.c_str() );
 
-    egl->setPrintPos( 10, 115 );
-    egl->printf("Flarmnet: %s", FLARMNET_VERSION );
+    swUp.begin(GPIO_NUM_0, B_UP );
 
-    egl->setFont(ucg_font_ncenR14_hr);
-    egl->setPrintPos( 10, 150 );
-    egl->printf("Press Button for SW-Update");
-    Switch::begin(GPIO_NUM_0);
-    for(int i=0; i<20; i++){  // 40
-    	if( Switch::isClosed() ){
-    		egl->clearScreen();
+
+    for(int i=0; i<30; i++){  // 40
+    	if( swUp.isClosed() ){
     		ota = new OTA();
     		ota->doSoftwareUpdate();
     		while(1){
@@ -123,35 +98,42 @@ extern "C" void app_main(void)
     	}
     	delay( 100 );
     }
-    egl->clearScreen();
-    egl->setColor(COLOR_WHITE);
-   	egl->setPrintPos( 10, 35 );
 
-    // SwitchObs obs("main");
-    menu = new SetupMenu();
-    menu->begin();
+    // menu = new SetupMenu();
+    // menu->begin();
     Switch::startTask();
 
-    if( traffic_demo.get() ){
-    	ESP_LOGI(FNAME,"Traffic Demo");
-    	traffic_demo.set(0);
-    	traffic_demo.commit();
-    	Flarm::startSim();
-    }
-
-    egl->clearScreen();
     Flarm::begin();
     Serial::begin();
-    TargetManager::begin();
-    Buzzer::play2( BUZZ_DH, 150,audio_volume.get(), BUZZ_DH, 1000, 0, 1 );
 
     if( Serial::selfTest() )
     	printf("Serial Loop Test OK");
     else
     	printf("Self Loop Test Failed");
 
+
+    // gpio_set_drive_capability(GPIO_NUM_4, GPIO_DRIVE_CAP_MAX );
+    int i=0;
+
+    gpio_pad_select_gpio(GPIO_NUM_4);
+    gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
+    gpio_pad_select_gpio(GPIO_NUM_9);
+    gpio_set_direction(GPIO_NUM_9, GPIO_MODE_OUTPUT);
+
     while(1){
-    	delay(1000);
+    	i++;
+    	delay(100);
+    	if( (i%20) == 0 || (i%20) == 2 || (i%20) == 5 ){
+    		gpio_set_level( GPIO_NUM_4, 1 );
+    		gpio_set_level( GPIO_NUM_9, 1 );
+    		ESP_LOGI(FNAME,"LED 1 %d", i%20 );
+    	}
+    	if( (i%20) == 1 || (i%20) == 3 || (i%20) == 6 ){
+    	    gpio_set_level( GPIO_NUM_4, 0 );
+    	    gpio_set_level( GPIO_NUM_9, 0 );
+    	    ESP_LOGI(FNAME,"LED 0 %d", i%20 );
+    	}
     }
+
 
 }

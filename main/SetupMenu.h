@@ -26,8 +26,8 @@ public:
 	void setup();
 	void display( int mode=0 );
 	const char *value() { return 0; };
-	void up( int count );  // step up to parent
-	void down( int count );
+	void up(int count);  // step up to parent
+	void down(int count);
 	void press();
 	void longPress();
 	void escape();
@@ -38,6 +38,7 @@ public:
 	static bool focus;
 	static bool _menu_active;
 	static int hpos;
+
 
 	static void setup_create_root( MenuEntry *top );
 	static void options_menu_create_units( MenuEntry *top );

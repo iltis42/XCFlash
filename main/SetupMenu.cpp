@@ -23,7 +23,7 @@
 #include <string>
 #include "SetupNG.h"
 #include "Colors.h"
-#include "flarmview.h"
+#include "xcflash.h"
 
 SetupMenuSelect * audio_range_sm = 0;
 SetupMenuSelect * mpu = 0;

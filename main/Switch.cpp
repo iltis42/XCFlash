@@ -22,7 +22,7 @@
 #include "average.h"
 #include "vector.h"
 #include "Units.h"
-#include "flarmview.h"
+#include "xcflash.h"
 
 
 

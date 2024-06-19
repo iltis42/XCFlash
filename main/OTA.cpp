@@ -23,7 +23,7 @@
 #include "qrcodegen.h"
 #include "AdaptUGC.h"
 #include "Colors.h"
-#include "flarmview.h"
+#include "xcflash.h"
 
 extern AdaptUGC *egl;
 

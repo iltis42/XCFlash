@@ -28,6 +28,17 @@
 OTA *ota = 0;
 AdaptUGC *egl = 0;
 
+
+#define TDEAD 70
+#define TCRIT 65
+#define TMAX  60
+
+/*
+#define TDEAD 50
+#define TCRIT 45
+#define TMAX  40
+*/
+
 // global color variables for adaptable display variant
 
 typedef enum e_flash_freq { FLASH_OFF, FLASH_LOW, FLASH_MED, FLASH_HIGH } e_flash_freq;
@@ -39,13 +50,14 @@ Switch swMode;
 float zoom=1.0;
 
 static bool moving_state = false;
+static float GS = 0;
 
 bool isMoving(){
 	bool moving=false;
-	float gs,track;
-	if( Flarm::getGPS( gs, track ) ){
-		ESP_LOGI(FNAME,"GS: %f",  gs );
-		if( gs > 0.5 /* 15 */ )
+	float track;
+	if( Flarm::getGPS( GS, track ) ){
+		// ESP_LOGI(FNAME,"GS: %f",  gs );
+		if( GS > 10 )
 			moving = true;
 	}
 	if( moving_state != moving ){
@@ -58,13 +70,13 @@ bool isMoving(){
 void led_on(){
     gpio_set_level( GPIO_NUM_4, 1 );
 	gpio_set_level( GPIO_NUM_9, 1 );
-	ESP_LOGI(FNAME,"LED 1");
+	// ESP_LOGI(FNAME,"LED 1");
 }
 
 void led_off(){
     gpio_set_level( GPIO_NUM_4, 0 );
 	gpio_set_level( GPIO_NUM_9, 0 );
-	ESP_LOGI(FNAME,"LED 0");
+	// ESP_LOGI(FNAME,"LED 0");
 }
 
 #define PERIOD 50
@@ -156,9 +168,9 @@ extern "C" void app_main(void)
     int i=0;
     while(1){
     	if( Flarm::gpsStatus() != true ){  // GPS bad
-    		if( tsens_out > 80 )
+    		if( tsens_out > TDEAD )
     			flash_freq = FLASH_OFF;
-    		else if(  tsens_out > 75 ){
+    		else if(  tsens_out > TCRIT ){
     			flash_freq = FLASH_LOW;
     		}
     		else{
@@ -166,29 +178,29 @@ extern "C" void app_main(void)
     		}
     	}
     	else{  // GPS okay
-    		ESP_LOGI(FNAME,"GPS OK");
+    		// ESP_LOGI(FNAME,"GPS OK");
     		if( isMoving() ){  // we are moving
-    			ESP_LOGI(FNAME,"Moving");
+    			// ESP_LOGI(FNAME,"Moving");
     			if( Flarm::alarmLevel() > 0 || Flarm::objectInRange( 1.5 ) ){ // there is Flarm alarm or close target
-    				if( tsens_out < 70 ){
+    				if( tsens_out < TMAX ){
     					flash_freq = FLASH_HIGH;
     				}else{
-    					if( tsens_out < 75 ){        // is is acceptable for lower flashes ?
+    					if( tsens_out < TCRIT ){        // is is acceptable for lower flashes ?
     						flash_freq = FLASH_MED;
     					}else{                       // no, is it critically hot ?
-    						if( tsens_out < 80 )
+    						if( tsens_out < TMAX )
     							flash_freq = FLASH_LOW;  // no, lower freq should be okay
     						else
-    							flash_freq = FLASH_OFF;  // yessss, switch off > 80°C CPU temperature
+    							flash_freq = FLASH_OFF;  // yessss, switch off > TMAX°C CPU temperature
     					}
     				}
     			}else{
-    				if( tsens_out < 75 )
+    				if( tsens_out < TCRIT )
     					flash_freq = FLASH_MED;  // no, lower freq should be okay
-    				else if( tsens_out < 80 ){
+    				else if( tsens_out < TMAX ){
     					flash_freq = FLASH_LOW;  // yessss, flash low
     				}else{
-    					flash_freq = FLASH_OFF;  // switch off beyond 80°C CPU temperature
+    					flash_freq = FLASH_OFF;  // switch off beyond TMAX°C CPU temperature
     				}
     			}
     		}else{  // not moving
@@ -202,7 +214,7 @@ extern "C" void app_main(void)
     	// flash_freq = FLASH_HIGH;
     	if( (i%FLASHES) == 0 ){  // once per second
     		ESP_ERROR_CHECK(temp_sensor_read_celsius(&tsens_out));
-    		ESP_LOGI(FNAME,"FREQ: %d CPU-T: %.2f C", flash_freq, tsens_out );
+    		ESP_LOGI(FNAME,"FREQ: %d, CPU-T: %.2f°C, GPS: %d, GS: %.2f, FlarmAlarm:%d, CloseTarg: %d", flash_freq, tsens_out, Flarm::gpsStatus(), GS, Flarm::alarmLevel(), Flarm::objectInRange( 1.5 ) );
     	}
     	delay(PERIOD);
     	if( flash_freq == FLASH_LOW ){
@@ -228,7 +240,6 @@ extern "C" void app_main(void)
     				led_off();
     			}
     	}
-
     }
 
 }

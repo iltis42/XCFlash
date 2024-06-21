@@ -237,7 +237,7 @@ bool Serial::selfTest(){
 void Serial::huntBaudrate(){
 	if( !Flarm::connected() ){
 		trials++;
-		if( trials>20 ) { // An active Flarm sends every second at least
+		if( trials>40 ) { // An active Flarm sends every second at least
 			trials = 0;
 			baudrate++;
 			if( baudrate > 6 ){

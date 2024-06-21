@@ -67,8 +67,6 @@ void Switch::detach(SwitchObserver *obs) {
 
 void Switch::switchTask(void *pvParameters){
 	while(1){
-		swUp.tick();
-		swDown.tick();
 		swMode.tick();
 		delay(TASK_PERIOD);
 	}

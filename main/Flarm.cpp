@@ -11,6 +11,13 @@
 #define FLARM_TIMEOUT (10* (1000/TASK_PERIOD))
 #define PFLAU_TIMEOUT (10* (1000/TASK_PERIOD))
 
+#define CENTERX 120
+#define CENTERY 120
+#define DISTANCE_FAR 1000.0
+
+#define RTD(x) (x*RAD_TO_DEG)
+#define DTR(x) (x*DEG_TO_RAD)
+
 int Flarm::RX = 0;
 int Flarm::TX = 1;
 int Flarm::GPS = 1;
@@ -26,9 +33,22 @@ bool Flarm::myGPS_OK = false;
 char Flarm::ID[20] = "";
 int Flarm::bincom = 0;
 int Flarm::pflau_timeout = PFLAU_TIMEOUT;
+int Flarm::pflaa_timeout = 0;
 TaskHandle_t Flarm::pid = 0;
 AdaptUGC* Flarm::ucg;
 e_audio_alarm_type_t Flarm::alarm = AUDIO_ALARM_OFF;
+
+int Flarm::oldDist = 0;
+int Flarm::oldVertical = 0;
+int Flarm::oldBear = 0;
+int Flarm::alarmOld=0;
+int Flarm::_tick=0;
+int Flarm::timeout=0;
+int Flarm::ext_alt_timer=0;
+int Flarm::_numSat=0;
+int Flarm::bincom_port=0;
+float Flarm::closest_object=DISTANCE_FAR;
+bool Flarm::flarm_sim = false;
 
 extern xSemaphoreHandle spiMutex;
 
@@ -172,25 +192,15 @@ void Flarm::parsePFLAA( const char *pflaa ){
 
 	_tick=0;
 	timeout = FLARM_TIMEOUT;
+	if( PFLAA.groundSpeed > 3.6 ){  // only regard moving objects
+		float distance = sqrt( PFLAA.relNorth*PFLAA.relNorth + PFLAA.relEast*PFLAA.relEast )/1000.0;
+		if( closest_object > distance ){
+			closest_object = distance;
+		}
+	}
 }
 
-#define CENTERX 120
-#define CENTERY 120
 
-#define RTD(x) (x*RAD_TO_DEG)
-#define DTR(x) (x*DEG_TO_RAD)
-
-int Flarm::oldDist = 0;
-int Flarm::oldVertical = 0;
-int Flarm::oldBear = 0;
-int Flarm::alarmOld=0;
-int Flarm::_tick=0;
-int Flarm::timeout=0;
-int Flarm::ext_alt_timer=0;
-int Flarm::_numSat=0;
-int Flarm::bincom_port=0;
-
-bool Flarm::flarm_sim = false;
 
 
 // Calculate the checksum and output it as an int
@@ -233,10 +243,13 @@ void Flarm::flarmSim(){
 	}
 }
 
-
 void Flarm::progress(){  //  per second
 	if( timeout ){
 		timeout--;
+	}
+	if( timeout == 0 ){
+		myGPS_OK = false;
+		closest_object = DISTANCE_FAR;
 	}
 	// ESP_LOGI(FNAME,"progress, timeout=%d", timeout );
 	if( flarm_sim ){
@@ -252,7 +265,6 @@ void Flarm::progress(){  //  per second
 		}
 	}
 }
-
 
 void Flarm::parseNMEA( const char *str, int len ){
 	// ESP_LOGI(FNAME,"parseNMEA: %s, len: %d", str,  strlen(str) );

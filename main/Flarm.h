@@ -19,7 +19,7 @@ typedef struct {
 	unsigned int ID;
 	int track;
 	float turnRate;
-	int groundSpeed;
+	float groundSpeed;
 	float climbRate;
 	char acftType[3];
 } nmea_pflaa_s;
@@ -78,6 +78,13 @@ public:
 			}
 	}
 	static inline bool gpsStatus() { return myGPS_OK; }
+
+	static inline bool objectInRange( float dist ){
+		if ( closest_object < dist )
+			return true;
+		else
+			return false;
+	}
 	static float getGndSpeedKnots() { return gndSpeedKnots; }
 	static inline float getGndCourse() { return gndCourse; }
 	static int bincom;
@@ -92,8 +99,6 @@ public:
 	static void taskFlarm(void *pvParameters);
 	static void startSim() { flarm_sim = true; };
 	static inline bool getSim() { return flarm_sim; };
-	static inline int getTXBit() { return TX; };
-	static inline int getGPSBit() { return GPS; };
 
 private:
 	static int calcNMEACheckSum(const char *nmea);
@@ -104,7 +109,7 @@ private:
 	static void flarmSim();
 
 	static AdaptUGC* ucg;
-	static int RX,TX,GPS,Power;
+	static int GPS,TX,RX,Power;
 	static int AlarmLevel;
 	static int RelativeBearing,RelativeVertical,RelativeDistance;
 	static float gndSpeedKnots;
@@ -125,6 +130,8 @@ private:
 	static TaskHandle_t pid;
 	static bool flarm_sim;
 	static int pflau_timeout;
+	static int pflaa_timeout;
+	static float closest_object;
 };
 
 #endif

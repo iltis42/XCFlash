@@ -63,8 +63,8 @@
             	 	   	  // document.write( xhr.response );
             	 	   	  var blob = new Blob( [xhr.response], {type:"octet-stream"} );
             	       	  const href = URL.createObjectURL(blob);
-            	       	  var filename="xcflarmdisplay-core-" + new Date().toJSON().slice(0,10) + ".txt";
-            	       	  window.alert("Download XCFlarmDisplay Core File, filename: " + filename ); 
+            	       	  var filename="xcflash-core-" + new Date().toJSON().slice(0,10) + ".txt";
+            	       	  window.alert("Download XCFlash Core File, filename: " + filename ); 
             	       	  const a = Object.assign( document.createElement('a'),{href, style:"display:none", download:filename });
             	       	  document.body.appendChild(a);
             	       	  a.click();
@@ -113,8 +113,8 @@
             	       else{
             	       		 var blob = new Blob( [xhr.response], {type:"octet-stream"} );
             	       		 const href = URL.createObjectURL(blob);
-            	       		 var filename="xcflarmdisplay-config-" + new Date().toJSON().slice(0,10) + ".csv";
-            	       		 window.alert("Download XCFlarmDisplay Configuration, filename: " + filename ); 
+            	       		 var filename="xcflash-config-" + new Date().toJSON().slice(0,10) + ".csv";
+            	       		 window.alert("Download XCFlash Configuration, filename: " + filename ); 
             	       		 const a = Object.assign( document.createElement('a'),{href, style:"display:none", download:filename });
             	       		 document.body.appendChild(a);
             	       		 a.click();

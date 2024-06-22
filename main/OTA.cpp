@@ -25,6 +25,9 @@
 #include "Colors.h"
 #include "xcflash.h"
 
+extern void led_on_gn();
+extern void led_off_gn();
+
 extern AdaptUGC *egl;
 
 OTA::OTA(){
@@ -35,10 +38,11 @@ const char* ssid = CONFIG_AP_SSID;
 const char* wifi_password = "esp32-ota";
 
 void OTA::writeText( int line, const char *text ){
-	egl->setFont(ucg_font_ncenR14_hr);
-	egl->setPrintPos( 10, 30*line );
-	egl->setColor(COLOR_WHITE);
-	egl->printf("%s",text);
+	// egl->setFont(ucg_font_ncenR14_hr);
+	// egl->setPrintPos( 10, 30*line );
+	// egl->setColor(COLOR_WHITE);
+	// egl->printf("%s",text);
+	ESP_LOGI("FNAME","%s", text);
 }
 
 
@@ -149,7 +153,10 @@ void OTA::doSoftwareUpdate( ){
 			pro += std::to_string( Webserver.getOtaProgress() ) + " %";
 			writeText(line,pro.c_str());
 		}
-		vTaskDelay(1000/portTICK_PERIOD_MS);
+		led_on_gn();
+		delay(500);
+		led_off_gn();
+		delay(500);
 		if( Webserver.getOtaStatus() == otaStatus::DONE ){
 			ESP_LOGI(FNAME,"Flash status, Now restart");
 			writeText(line,"Download SUCCESS !");
@@ -162,8 +169,9 @@ void OTA::doSoftwareUpdate( ){
 			vTaskDelay(3000/portTICK_PERIOD_MS);
 			break;
 		}
+
 	}
-    Webserver.stop();
+	Webserver.stop();
 	ESP_LOGI(FNAME,"Now restart");
 	esp_restart();
 }

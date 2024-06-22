@@ -79,6 +79,14 @@ void led_off(){
 	// ESP_LOGI(FNAME,"LED 0");
 }
 
+void led_on_gn(){
+    gpio_set_level( GPIO_NUM_4, 1 );
+}
+
+void led_off_gn(){
+    gpio_set_level( GPIO_NUM_4, 0 );
+}
+
 #define PERIOD 50
 #define FLASHES (1000/(PERIOD))  // 10
 
@@ -141,20 +149,9 @@ extern "C" void app_main(void)
     // Initial function test
     for( int i=0; i<3; i++ ){
     	led_on();
-     	delay( 100 );
+     	delay( 50 );
      	led_off();
-     	delay(100);
-     }
-
-    for(int i=0; i<30; i++){  // 40
-    	if( swMode.isClosed() ){
-    		ota = new OTA();
-    		ota->doSoftwareUpdate();
-    		while(1){
-    			delay(100);
-    		}
-    	}
-    	delay( 100 );
+     	delay( 50 );
     }
     Switch::startTask();
     Flarm::begin();
@@ -239,6 +236,14 @@ extern "C" void app_main(void)
     			if( (i%(FLASHES*1)) == 1 || (i%(FLASHES*1)) == 3 || (i%(FLASHES*1)) == 5 || (i%(FLASHES*1)) == 7 || (i%(FLASHES*1)) == 9 ){
     				led_off();
     			}
+    		}
+    	}
+    	if( swMode.isClosed() ){
+    		ota = new OTA();
+    		led_off();
+    		ota->doSoftwareUpdate();
+    		while(1){
+    			delay(1000);
     		}
     	}
     	delay(PERIOD);

@@ -69,14 +69,14 @@ bool isMoving(){
 
 void led_on(){
     gpio_set_level( GPIO_NUM_4, 1 );
-	gpio_set_level( GPIO_NUM_9, 1 );
-	// ESP_LOGI(FNAME,"LED 1");
+    gpio_set_level( GPIO_NUM_9, 1 );
+    ESP_LOGI(FNAME,"LED 1");
 }
 
 void led_off(){
     gpio_set_level( GPIO_NUM_4, 0 );
-	gpio_set_level( GPIO_NUM_9, 0 );
-	// ESP_LOGI(FNAME,"LED 0");
+    gpio_set_level( GPIO_NUM_9, 0 );
+    ESP_LOGI(FNAME,"LED 0");
 }
 
 void led_on_gn(){
@@ -87,7 +87,7 @@ void led_off_gn(){
     gpio_set_level( GPIO_NUM_4, 0 );
 }
 
-#define PERIOD 50
+#define PERIOD 10
 #define FLASHES (1000/(PERIOD))  // 10
 
 extern "C" void app_main(void)
@@ -149,9 +149,9 @@ extern "C" void app_main(void)
     // Initial function test
     for( int i=0; i<3; i++ ){
     	led_on();
-     	delay( 50 );
+     	delay( 30 );
      	led_off();
-     	delay( 50 );
+     	delay( 30 );
     }
     Switch::startTask();
     Flarm::begin();
@@ -205,39 +205,32 @@ extern "C" void app_main(void)
     		}
     	}
     	i++;
+	if( flash_freq == FLASH_LOW ){
+	  if( i>600 )
+	    i=0;
+	}else if( flash_freq == FLASH_MED ){
+	  if( i>300 )
+	    i=0;
+	}else if ( flash_freq == FLASH_HIGH ){
+	  if( i>100 )
+	    i=0;
+	}
+
     	if( (i%FLASHES) == 0 ){  // once per second
     		ESP_ERROR_CHECK(temp_sensor_read_celsius(&tsens_out));
     		ESP_LOGI(FNAME,"FREQ: %d, CPU-T: %.2f°C, GPS: %d, GS: %.2f, FlarmAlarm:%d, CloseTarg: %d", flash_freq, tsens_out, Flarm::gpsStatus(), GS, Flarm::alarmLevel(), Flarm::objectInRange( 1.5 ) );
     	}
-    	if( flash_freq == FLASH_OFF ){
-    		led_off();
-    	}else{
-    		// flash_freq = FLASH_HIGH;
 
-    		if( flash_freq == FLASH_LOW ){
-    			if( (i%(FLASHES*5)) == 0 || (i%(FLASHES*5)) == 2 || (i%(FLASHES*5)) == 4 ){   // every 5 seconds
-    				led_on();
-    			}
-    			if( (i%(FLASHES*5)) == 1 || (i%(FLASHES*5)) == 3 || (i%(FLASHES*5)) == 5 ){
-    				led_off();
-    			}
-    		}else if ( flash_freq == FLASH_MED ){                  // every 2 seconds
-    			if( (i%(FLASHES*2)) == 0 || (i%(FLASHES*2)) == 2 || (i%(FLASHES*2)) == 4 ){
-    				led_on();
-    			}
-    			if( (i%(FLASHES*2)) == 1 || (i%(FLASHES*2)) == 3 || (i%(FLASHES*2)) == 5 ){
-    				led_off();
-    			}
-    		}
-    		else if ( flash_freq == FLASH_HIGH ){                 // every second
-    			if( (i%(FLASHES*1)) == 0 || (i%(FLASHES*1)) == 2 || (i%(FLASHES*1)) == 4 || (i%(FLASHES*1)) == 6 || (i%(FLASHES*1)) == 8 ){
-    				led_on();
-    			}
-    			if( (i%(FLASHES*1)) == 1 || (i%(FLASHES*1)) == 3 || (i%(FLASHES*1)) == 5 || (i%(FLASHES*1)) == 7 || (i%(FLASHES*1)) == 9 ){
-    				led_off();
-    			}
-    		}
-    	}
+    	if( flash_freq == FLASH_OFF ){
+    	  led_off();
+    	}else{
+	  if( i==0 || i==13  || i==26 ){   // 3 Flashes 30 mS 
+    	    led_on();
+    	  }
+    	  else if( i==3 || i==16  || i==29 ){
+    	    led_off();
+	  }
+	}
     	if( swMode.isClosed() ){
     		ota = new OTA();
     		led_off();

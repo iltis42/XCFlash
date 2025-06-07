@@ -70,6 +70,7 @@ const uart_port_t uart_num = UART_NUM_1;
 bool Serial::bincom_mode = false;  // we start with bincom timer inactive
 int Serial::trials=0;
 int Serial::baudrate = 0;
+bool Serial::baudrate_ok = false;
 
 int Serial::pullBlock( RingBufCPP<SString, QUEUE_SIZE>& q, char *block, int size ){
         xSemaphoreTake(qMutex,portMAX_DELAY );
@@ -183,6 +184,9 @@ void Serial::serialHandler(void *pvParameters)
 		}
 		if( !Flarm::connected() ){
 			huntBaudrate();
+		}else
+		{
+			baudrate_ok = true;
 		}
 		delay( 100 );
 	} // end while( true )
@@ -237,7 +241,10 @@ bool Serial::selfTest(){
 void Serial::huntBaudrate(){
 	if( !Flarm::connected() ){
 		trials++;
-		if( trials>40 ) { // An active Flarm sends every second at least
+		int limit = 40;
+		if( baudrate_ok )
+			limit = 2000;  // 200 s = survive a Flarm restart while ON baudrate detected
+		if( trials>limit ) { // An active Flarm sends every second at least
 			trials = 0;
 			baudrate++;
 			if( baudrate > 6 ){

@@ -67,6 +67,7 @@ private:
 	static TaskHandle_t pid;
 	static int trials;
 	static int baudrate;
+	static bool baudrate_ok;
 };
 
 #endif

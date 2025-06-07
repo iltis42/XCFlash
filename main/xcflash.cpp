@@ -70,13 +70,13 @@ bool isMoving(){
 void led_on(){
     gpio_set_level( GPIO_NUM_4, 1 );
     gpio_set_level( GPIO_NUM_9, 1 );
-    ESP_LOGI(FNAME,"LED 1");
+    // ESP_LOGI(FNAME,"LED 1");
 }
 
 void led_off(){
     gpio_set_level( GPIO_NUM_4, 0 );
     gpio_set_level( GPIO_NUM_9, 0 );
-    ESP_LOGI(FNAME,"LED 0");
+    // ESP_LOGI(FNAME,"LED 0");
 }
 
 void led_on_gn(){
@@ -175,9 +175,7 @@ extern "C" void app_main(void)
     		}
     	}
     	else{  // GPS okay
-    		// ESP_LOGI(FNAME,"GPS OK");
     		if( isMoving() ){  // we are moving
-    			// ESP_LOGI(FNAME,"Moving");
     			if( Flarm::alarmLevel() > 0 || Flarm::objectInRange( 1.5 ) ){ // there is Flarm alarm or close target
     				if( tsens_out < TMAX ){
     					flash_freq = FLASH_HIGH;
@@ -204,6 +202,7 @@ extern "C" void app_main(void)
     			flash_freq = FLASH_OFF;  // GPS okay, standing on GND
     		}
     	}
+        // flash_freq = FLASH_HIGH;
     	i++;
 	if( flash_freq == FLASH_LOW ){
 	  if( i>600 )
